@@ -235,7 +235,7 @@ public final class TerraLensePlugin extends JavaPlugin {
                 config.maxQueuedRenders(), metrics, log);
 
         TerrainColorResolver colors = TerrainColorResolver.create(
-                config.heightShading(), config.heightShadingStrength());
+                config.hudVisualStyle(), config.heightShading(), config.heightShadingStrength());
 
         // Two fonts share one set of textures and differ only in ascent: one lifts the map above
         // the baseline (bottom anchors), one hangs it below (top anchors).

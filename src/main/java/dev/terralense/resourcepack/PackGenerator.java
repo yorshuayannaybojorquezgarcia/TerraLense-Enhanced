@@ -95,7 +95,7 @@ public final class PackGenerator {
     private String fingerprint(PackLayout layout, int packFormat) {
         String raw = pluginVersion
                 // Bumped when the pack's structure changes, so existing caches are invalidated.
-                + "|v3"
+                + "|v4-outline-arrow"
                 + "|" + packFormat
                 + "|" + layout.gridSize()
                 + "|" + layout.cellScreenSize()

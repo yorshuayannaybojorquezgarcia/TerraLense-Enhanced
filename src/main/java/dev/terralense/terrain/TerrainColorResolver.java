@@ -1,5 +1,6 @@
 package dev.terralense.terrain;
 
+import dev.terralense.config.HudVisualStyle;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -40,6 +41,37 @@ public final class TerrainColorResolver {
             merged.putAll(overrides);
         }
         return new TerrainColorResolver(merged, heightShading,
+                Math.clamp(shadingStrength, 0.0D, 1.0D));
+    }
+
+    /** Distinct, intentionally authored colour treatments selected by the HUD style. */
+    public static TerrainColorResolver create(HudVisualStyle visualStyle,
+                                              boolean heightShading,
+                                              double shadingStrength) {
+        Map<TerrainCategory, TerrainStyle> palette = defaultPalette();
+        if (visualStyle == HudVisualStyle.MODERN) {
+            palette.put(TerrainCategory.GRASS, TerrainStyle.of(0x559C63));
+            palette.put(TerrainCategory.FOLIAGE, TerrainStyle.of(0x76B86A));
+            palette.put(TerrainCategory.LEAVES, TerrainStyle.of(0x347B53));
+            palette.put(TerrainCategory.DIRT, TerrainStyle.of(0x8D7255));
+            palette.put(TerrainCategory.PATH, TerrainStyle.of(0xC3A982));
+            palette.put(TerrainCategory.SAND, TerrainStyle.of(0xF0DAA3));
+            palette.put(TerrainCategory.STONE, TerrainStyle.of(0x929FA4));
+            palette.put(TerrainCategory.DEEPSLATE, TerrainStyle.of(0x46515F));
+            palette.put(TerrainCategory.WATER, TerrainStyle.of(0x2589BF, 0.0D));
+            palette.put(TerrainCategory.SNOW, TerrainStyle.of(0xF7FAFD));
+            palette.put(TerrainCategory.LAVA, TerrainStyle.of(0xFF7633, 0.0D));
+            palette.put(TerrainCategory.NETHER, TerrainStyle.of(0xA34D46));
+            palette.put(TerrainCategory.END, TerrainStyle.of(0xE7E0A8));
+        } else if (visualStyle == HudVisualStyle.MINIMAL) {
+            palette.put(TerrainCategory.GRASS, TerrainStyle.of(0x739783));
+            palette.put(TerrainCategory.FOLIAGE, TerrainStyle.of(0x8DAA91));
+            palette.put(TerrainCategory.LEAVES, TerrainStyle.of(0x527D6D));
+            palette.put(TerrainCategory.WATER, TerrainStyle.of(0x5C94B2, 0.0D));
+            palette.put(TerrainCategory.STONE, TerrainStyle.of(0x9BA3A3));
+            palette.put(TerrainCategory.SAND, TerrainStyle.of(0xD5CBB2));
+        }
+        return new TerrainColorResolver(palette, heightShading,
                 Math.clamp(shadingStrength, 0.0D, 1.0D));
     }
 

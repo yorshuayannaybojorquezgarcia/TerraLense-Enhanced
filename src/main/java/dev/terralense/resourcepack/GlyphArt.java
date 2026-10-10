@@ -81,6 +81,7 @@ final class GlyphArt {
         for (int y = 0; y < size; y++) {
             for (int x = 0; x < size; x++) {
                 int covered = 0;
+                int outlined = 0;
                 for (int sy = 0; sy < samples; sy++) {
                     for (int sx = 0; sx < samples; sx++) {
                         double px = x + (sx + 0.5D) / samples - 0.5D;
@@ -89,14 +90,21 @@ final class GlyphArt {
                         double dy = py - center;
                         double localX = dx * cos - dy * sin;
                         double localY = dx * sin + dy * cos;
-                        if (insideArrow(localX / center, localY / center)) {
+                        double nx = localX / center;
+                        double ny = localY / center;
+                        if (insideArrow(nx, ny)) {
                             covered++;
+                        } else if (insideArrow(nx * 0.78D, ny * 0.78D)) {
+                            outlined++;
                         }
                     }
                 }
                 if (covered > 0) {
                     int alpha = (int) Math.round(255.0D * covered / (samples * samples));
-                    pixels[y * size + x] = (alpha << 24) | 0x00FF_FFFF;
+                    pixels[y * size + x] = (alpha << 24) | 0x00F7_FCFD;
+                } else if (outlined > 0) {
+                    int alpha = (int) Math.round(230.0D * outlined / (samples * samples));
+                    pixels[y * size + x] = (alpha << 24) | 0x0010_2939;
                 }
             }
         }
