@@ -1,0 +1,51 @@
+name: TerraLense
+version: '${version}'
+main: dev.terralense.TerraLensePlugin
+api-version: '${apiVersion}'
+description: Server-side minimap with terrain, rotation, markers and waypoints. No client mod needed.
+author: TerraLense
+website: https://www.spigotmc.org/resources/terralense.138116/
+folia-supported: false
+
+# Downloaded by Paper at load time. Keep in sync with sqliteVersion in gradle.properties.
+libraries:
+  - org.xerial:sqlite-jdbc:${sqliteVersion}
+
+commands:
+  terralense:
+    description: TerraLense minimap controls.
+    usage: /terralense help
+    aliases: [tl, minimap]
+
+permissions:
+  terralense.use:
+    description: Allows using the minimap and its player-facing commands.
+    default: true
+  terralense.toggle:
+    description: Allows toggling the minimap on and off.
+    default: true
+  terralense.waypoint:
+    description: Allows creating and managing personal waypoints.
+    default: true
+  terralense.waypoint.teleport:
+    description: Allows teleporting to your own waypoints.
+    default: op
+  terralense.radar:
+    description: Shows nearby players on the minimap.
+    default: true
+  terralense.admin:
+    description: Grants all TerraLense administrative permissions.
+    default: op
+    children:
+      terralense.reload: true
+      terralense.debug: true
+      terralense.status: true
+  terralense.reload:
+    description: Allows reloading the TerraLense configuration.
+    default: op
+  terralense.debug:
+    description: Allows viewing debug diagnostics.
+    default: op
+  terralense.status:
+    description: Allows viewing the status summary.
+    default: op

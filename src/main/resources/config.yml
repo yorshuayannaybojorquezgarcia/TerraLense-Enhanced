@@ -1,0 +1,248 @@
+# ---------------------------------------------------------------------------
+# TerraLense configuration
+#
+# The defaults work as-is. Out-of-range values are clamped and reported in
+# console instead of failing startup.
+#
+# Remember to set resource-pack.self-host.public-address if players connect
+# to this server remotely.
+# ---------------------------------------------------------------------------
+
+general:
+  # Master switch. When false, no minimap is rendered for anyone.
+  enabled: true
+  # Ticks between minimap updates. Lower is smoother but costs more CPU.
+  #
+  # This is the main control for how responsive rotation feels: at 5 ticks the map
+  # only turns 4 times a second, which reads as lag while looking around. 2 ticks
+  # (10 updates/second) feels smooth.
+  #
+  # Terrain is only re-sampled when it actually changes, so a low value here mostly
+  # costs re-transform work, not world scanning. Range 1-100.
+  update-interval-ticks: 2
+  # Send a one-line hint the first time a player joins.
+  join-message: true
+  # Verbose diagnostics in console. Also toggleable with /terralense debug.
+  debug: false
+
+  # Check SpigotMC for a newer version on startup.
+  #
+  # Runs off the main thread and never delays startup. If the check fails it stays
+  # quiet; nothing is ever downloaded or installed automatically.
+  update-check:
+    enabled: true
+    # Also tell operators (terralense.admin) when they join.
+    notify-admins: true
+
+hud:
+  enabled: true
+  # modern: circular dark outline; classic: respects shape/border; minimal: no border.
+  style: modern
+  # Actual terrain sampling and glyph resolution: 24 (legacy) or 32 (detail).
+  # Requires clients to accept the regenerated resource pack.
+  resolution: 24
+  # top-left, top-right, bottom-left, bottom-right
+  position: top-right
+  # How large the map is drawn on screen, in GUI pixels. This is not how much
+  # ground it covers, which is map.zoom.
+  #
+  # The grid is 24x24 cells, so:
+  #   72  -> 3px cells (small)
+  #   96  -> 4px cells (default)
+  #   144 -> 6px cells (large)
+  #   168 -> 7px cells (largest)
+  #
+  # Capped at 168: on the boss bar the map must fit inside the bar's fixed 182
+  # pixel width, otherwise the client clips it. Range 32-168.
+  size: 96
+
+  # Outline drawn around the map, as RGB hex. Empty or 'none' disables it.
+  # A border separates the map from the world behind it.
+  border: '1E2A33'
+  # circle, rounded-square, square
+  shape: circle
+  # Gap between the minimap and the screen edge, in GUI pixels.
+  margin: 8
+
+  # Which part of the screen the map is drawn on.
+  #
+  #   boss-bar   - top of the screen (default). Does not fade. Centred
+  #                horizontally, so its position shifts with screen width.
+  #   action-bar - just above the hotbar. Also centred, and fades so it is
+  #                resent continuously.
+  #   sidebar    - upper right. NOT USABLE for the map: the sidebar fixes line
+  #                height at ~10px (cells are 4px), shows only ~15 lines, and
+  #                prints a score number on each line. The map ends up stretched,
+  #                truncated and cluttered with digits.
+  #
+  # Only single-line surfaces work, because the generated font controls vertical
+  # layout inside one line. The sidebar controls it itself, which cannot be
+  # overridden.
+  anchor: boss-bar
+
+  # Keep the map pinned to the left end of the boss bar.
+  #
+  # The boss bar is a fixed 182 GUI pixels wide and always centred, so its left end
+  # is a constant distance from the centre. Anchoring there means the map does NOT
+  # move when you resize the window, switch to fullscreen, or change GUI scale.
+  #
+  # Set false to position purely from the screen centre instead, which shifts when
+  # the screen size changes. Only applies with anchor: boss-bar.
+  pin-to-bar-edge: true
+
+  # Horizontal placement, in map cells (one cell = hud.size / 24 pixels).
+  #
+  # Both HUD surfaces centre their text, and a server cannot know a player's screen
+  # width or GUI scale. So the map is positioned as an offset from centre, and the
+  # value needed to reach the left edge depends on resolution and GUI scale.
+  #
+  # This is a SERVER-WIDE starting point. Because the right value depends on each
+  # player's GUI scale, players fine-tune it themselves with:
+  #
+  #   /terralense position left     (nudge left)
+  #   /terralense position right    (nudge right)
+  #   /terralense position center   (back to the default)
+  #
+  # Their choice is saved per player. Leave this at 0 unless every player on your
+  # server uses the same resolution and GUI scale.
+  #
+  # Negative moves left, positive right. Range -160 to 160.
+  horizontal-offset: 0
+
+map:
+  # player = the player's facing direction stays at the top (terrain rotates)
+  # north  = north stays at the top (only the arrow rotates)
+  orientation: player
+  zoom:
+    # Blocks per map cell. The grid is 24x24 cells, so this sets the area covered:
+    #   2 ->  48x48 blocks (close in)
+    #   4 ->  96x96 blocks
+    #   8 -> 192x192 blocks (default)
+    #  16 -> 384x384 blocks (widest)
+    #
+    # Players change this with /terralense zoom <value>.
+    default: 8
+    minimum: 1
+    maximum: 16
+
+  # Opening the large map without typing a command.
+  #
+  # A server cannot detect arbitrary keys on a vanilla client, so there is no way
+  # to bind M. The swap-hands key (F by default) is the one key that raises a
+  # server-side event, so double-tapping it opens the large map.
+  #
+  # A single press still swaps hands normally; only the double-tap is intercepted.
+  # /terralense map works regardless of this setting.
+  key:
+    enabled: true
+    # Blocks per cell for the large view. Higher covers more ground.
+    zoom: 8
+
+terrain:
+  height-shading:
+    # Shades slopes so hills, cliffs and valleys are readable.
+    #
+    # Relief is sampled diagonally (north and west), so terrain shape shows up in
+    # both axes rather than only across one. This is the main contributor to how
+    # much detail the map appears to have.
+    enabled: true
+    # 0.0 = flat, 1.0 = strongest. Higher shows more terrain shape but mutes the
+    # base terrain colours. Range 0.0-1.0.
+    strength: 0.45
+  biome-colors:
+    # Reserved for a future release; biome tinting is not implemented yet and
+    # this switch currently has no effect.
+    enabled: false
+
+markers:
+  players:
+    # Show nearby players. Vanished and spectating players are never shown.
+    enabled: true
+    # Maximum distance in blocks a player marker is shown from. Range 8-512.
+    max-distance: 128
+  waypoints:
+    enabled: true
+  death:
+    enabled: true
+    # How long a death marker stays visible, in seconds. 0 disables expiry
+    # cleanup. Default is 24 hours.
+    duration-seconds: 86400
+  spawn:
+    enabled: true
+
+resource-pack:
+  # TerraLense needs a resource pack to draw the HUD.
+  #
+  #   auto     - generate and send, but stand down automatically if the server
+  #              already sends its own pack (never overwrites it)
+  #   generate - always generate and send the TerraLense pack
+  #   external - do not generate; you have merged the assets into your own pack
+  #   disabled - no pack, no HUD
+  #
+  # See the README for the merging limitation.
+  mode: auto
+
+  # Optional: host the pack yourself and put the URL here.
+  #
+  # Leave this empty to use the built-in HTTP server below, which is the simplest
+  # setup. If you set a URL it always takes priority, and the built-in server is
+  # not started.
+  #
+  # Must be http:// or https://. The file must be byte-identical to the generated
+  # pack, because the client verifies its SHA-1.
+  url: ''
+
+  # Built-in HTTP server for delivering the pack.
+  #
+  # Minecraft clients download resource packs over HTTP; a server cannot push pack
+  # data through the game connection. Rather than making you set up a web host,
+  # TerraLense can serve the file itself.
+  #
+  # SECURITY NOTE: this opens a second listening port, and it is unauthenticated
+  # because Minecraft clients cannot present credentials when fetching a pack.
+  # It serves exactly one file on one fixed path, answers only GET and HEAD, and
+  # never uses the request path to build a filesystem path. The only thing exposed
+  # is a resource pack every player receives anyway.
+  self-host:
+    enabled: true
+
+    # Port for the pack server. Must be open to players and not already in use.
+    # Use 0 to let the OS pick a free port (fine for local testing, but the port
+    # then changes on every restart).
+    port: 8123
+
+    # Address to bind to. Empty binds all interfaces, which is normally right.
+    bind-address: ''
+
+    # The hostname or IP players should download from.
+    #
+    # SET THIS for any server players connect to remotely. TerraLense cannot
+    # detect your public address behind NAT, Docker or a proxy. If left empty it
+    # falls back to the server's configured IP, then to 'localhost' with a
+    # warning, which only works when the client is on the same machine.
+    public-address: ''
+
+  # Resource pack format for your Minecraft version. The default (88) matches
+  # Minecraft 26.2. This number increments with most Minecraft releases, so if
+  # the client reports the pack as incompatible after updating, raise it. Kept
+  # configurable so a Minecraft update does not require a new plugin build.
+  #
+  # Reference: https://minecraft.wiki/w/Pack_format
+  pack-format: 88
+
+  # Tell a player once, in chat, if they declined the pack and the HUD is off.
+  notify-on-decline: true
+
+worlds:
+  enabled: true
+  # Worlds TerraLense stays out of entirely.
+  blacklist: []
+
+performance:
+  # Threads used for CPU rendering. Bounded by your CPU count. Range 1-8.
+  max-render-threads: 2
+  # Maximum terrain tiles held in memory. Each is roughly 1KB. Range 64-65536.
+  max-cached-chunks: 2048
+  # Maximum queued render jobs before new ones are dropped, which protects the
+  # server from unbounded memory growth under load. Range 8-8192.
+  max-queued-renders: 256
