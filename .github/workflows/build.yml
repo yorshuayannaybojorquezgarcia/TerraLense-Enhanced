@@ -22,12 +22,14 @@ jobs:
 
       - name: Configurar Gradle
         uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.2.1'
 
       - name: Permisos de Gradle
         run: chmod +x ./gradlew
 
       - name: Compilar TerraLense
-        run: ./gradlew clean build --stacktrace
+        run: gradle clean build --stacktrace
 
       - name: Subir JAR compilado
         if: success()
